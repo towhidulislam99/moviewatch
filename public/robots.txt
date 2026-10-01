@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://moviewatch-f5vapxzo.manus.space/sitemap.xml
+Sitemap: https://newmoviewatch.netlify.app/sitemap.xml
