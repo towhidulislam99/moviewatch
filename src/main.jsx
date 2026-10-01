@@ -2,9 +2,18 @@ import React, { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 
-const posterAssets = Array.from({ length: 36 }, (_, index) => index < 30
-  ? `/assets/video-posters/video-row-${Math.floor(index / 6) + 1}-${(index % 6) + 1}.jpg`
-  : `/assets/video-posters/video-row-5-${(index % 6) + 1}.jpg`);
+const posterAssets = [
+  '20-year-old-virgins.webp', '365-days.webp', 'a-good-lawyers-wife.webp', 'american-kamasutra.webp',
+  'baby-do-die-do.webp', 'backrooms.webp', 'body-of-night.webp', 'children-of-the-salt.webp',
+  'come-undone.webp', 'drawn-together.webp', 'heart-of-the-beast.webp', 'hideout-in-the-sun.webp',
+  'homesick-2015.webp', 'hranice-lasky.webp', 'i-love-trouble.webp', 'kamasutra-garden.webp',
+  'lotgenoten.webp', 'love-2015.webp', 'loving.webp', 'madrid-1987.webp', 'me-before-you.webp',
+  'nude.webp', 'runner-2026.webp', 'salamat-daks.webp', 'sapio.webp', 'sex-weather.webp',
+  'singles-2022.webp', 'skin-like-sun.webp', 'taya-2021.webp', 'the-escort-wife.webp',
+  'the-kamasutra-garden.webp', 'what-other-couples-do.webp', 'when-the-mist-clears.webp',
+  'women-in-the-dark.webp',
+].map((filename) => `/assets/movie-posters/${filename}`);
+posterAssets.push(posterAssets[0], posterAssets[1]);
 const ctaUrls = [
   'https://eatingjudgelos.com/ueiq7tue?key=3199bce6f9c152d9bab772d7cf879cf0',
   'https://eatingjudgelos.com/izgpxyjj?key=3f0d3461e12c63b9522bf5c9f235e514',
@@ -92,18 +101,13 @@ function MovieCard({ movie, isSaved, onToggleSaved }) {
   return (
     <article className="movie-card">
       <div className="poster-wrap">
-        <img src={movie.poster} alt={`${movie.title} poster`} loading="lazy" />
+        <a className="poster-link" href={ctaUrls[movie.ctaIndex]} target="_blank" rel="noreferrer" aria-label={`Watch ${movie.title}`}>
+          <img src={movie.poster} alt={`${movie.title} poster`} loading="lazy" />
+        </a>
         {movie.free && <span className="free-badge">Free</span>}
         <button className={`bookmark-button ${isSaved ? 'is-saved' : ''}`} aria-label={`${isSaved ? 'Remove' : 'Save'} ${movie.title} to list`} onClick={() => onToggleSaved(movie.slug)}>
           <BookmarkIcon filled={isSaved} />
         </button>
-        <a className="watch-button" href={ctaUrls[movie.ctaIndex]} target="_blank" rel="noreferrer">
-          <span>Watch Now</span><ArrowIcon />
-        </a>
-      </div>
-      <div className="movie-meta">
-        <h3>{movie.title}</h3>
-        <span>{movie.year} · {movie.genre}</span>
       </div>
     </article>
   );
@@ -115,7 +119,7 @@ function App() {
   const [filterValues, setFilterValues] = useState({ year: '', genre: '', price: '', rating: '', age: '' });
   const [activeTags, setActiveTags] = useState([]);
   const [sort, setSort] = useState('Popularity');
-  const [visibleCount, setVisibleCount] = useState(30);
+  const [visibleCount, setVisibleCount] = useState(24);
   const [saved, setSaved] = useState([]);
 
   const filteredMovies = useMemo(() => {
@@ -143,17 +147,17 @@ function App() {
     setFilterValues({ year: '', genre: '', price: '', rating: '', age: '' });
     setActiveTags([]);
     setSort('Popularity');
-    setVisibleCount(30);
+    setVisibleCount(24);
   };
 
   const setFilter = (key, value) => {
     setFilterValues((current) => ({ ...current, [key]: value }));
-    setVisibleCount(30);
+    setVisibleCount(24);
   };
 
   const toggleTag = (tag) => {
     setActiveTags((current) => current.includes(tag) ? current.filter((item) => item !== tag) : [...current, tag]);
-    setVisibleCount(30);
+    setVisibleCount(24);
   };
 
   const toggleSaved = (slug) => setSaved((current) => current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug]);
@@ -169,7 +173,7 @@ function App() {
           <label className="search-box">
             <SearchIcon />
             <span className="sr-only">Search for movies or TV shows</span>
-            <input value={search} onChange={(event) => { setSearch(event.target.value); setVisibleCount(30); }} placeholder="Search for movies or TV shows" />
+            <input value={search} onChange={(event) => { setSearch(event.target.value); setVisibleCount(24); }} placeholder="Search for movies or TV shows" />
             {search && <button type="button" aria-label="Clear search" onClick={() => setSearch('')}>×</button>}
           </label>
           <button className="signin-button">Sign In</button>
@@ -190,7 +194,7 @@ function App() {
         <section className="catalog-section" aria-label="Movie catalog">
           <div className="catalog-toolbar">
             <div className="tabs" role="tablist" aria-label="Content type">
-              {['All', 'Movies', 'TV Shows'].map((item) => <button key={item} role="tab" aria-selected={tab === item} className={tab === item ? 'active' : ''} onClick={() => { setTab(item); setVisibleCount(30); }}>{item}</button>)}
+              {['All', 'Movies', 'TV Shows'].map((item) => <button key={item} role="tab" aria-selected={tab === item} className={tab === item ? 'active' : ''} onClick={() => { setTab(item); setVisibleCount(24); }}>{item}</button>)}
             </div>
             <div className="filter-caption"><span className="funnel-mark">⌄</span> FILTERS</div>
             <div className="filters-row">
@@ -212,7 +216,8 @@ function App() {
             {filteredMovies.slice(0, visibleCount).map((movie) => <MovieCard key={`${movie.slug}-${movie.type}`} movie={movie} isSaved={saved.includes(movie.slug)} onToggleSaved={toggleSaved} />)}
           </div> : <div className="empty-state"><span className="empty-icon">⌕</span><h2>No titles found</h2><p>Try removing a filter or searching for another movie.</p><button onClick={resetAll}>Reset all filters</button></div>}
 
-          {filteredMovies.length > visibleCount && <button className="load-more" onClick={() => setVisibleCount((count) => count + 6)}>Load More Movie <span>↓</span></button>}
+          {filteredMovies.length > visibleCount && <button className="load-more" onClick={() => setVisibleCount((count) => count + 12)}>See More <span>↓</span></button>}
+          {filteredMovies.length > 0 && filteredMovies.length <= visibleCount && <a className="load-more external-load-more" href={ctaUrls[0]} target="_blank" rel="noreferrer">Load More <span className="loading-dots" aria-hidden="true"><i></i><i></i><i></i></span></a>}
         </section>
       </main>
 
