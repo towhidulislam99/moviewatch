@@ -47,6 +47,12 @@ a { color: inherit; text-decoration: none; }
 
 .content-shell { width: min(1168px, calc(100% - 56px)); margin: 0 auto; }
 .hero-section { padding: 15px 0 13px; }
+.ad-slot { width: 100%; margin: 10px auto 18px; text-align: center; }
+.ad-slot-label { display: block; margin-bottom: 5px; color: #647586; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+.ad-slot-frame { display: flex; justify-content: center; align-items: center; max-width: 100%; margin: 0 auto; overflow: hidden; }
+.ad-slot-frame iframe { display: block; max-width: 100%; border: 0; }
+.ad-slot--in-feed { margin: 2px auto; }
+.ad-grid-item { grid-column: 1 / -1; display: flex; justify-content: center; }
 .hero-copy { max-width: 1110px; }
 .eyebrow { margin: 0 0 6px; color: #667e92; font-size: 9px; font-weight: 800; letter-spacing: .15em; }
 h1 { margin: 0 0 14px; color: var(--white); font-size: 20px; line-height: 1.1; letter-spacing: -.02em; }
@@ -160,6 +166,7 @@ h1 { margin: 0 0 14px; color: var(--white); font-size: 20px; line-height: 1.1; l
   .menu-button { order: 3; width: 44px; min-height: 44px; display: grid; place-items: center; }
   .content-shell { width: calc(100% - 24px); }
   .hero-section { padding-top: 18px; }
+  .ad-slot--top { margin: 8px auto 16px; }
   .hero-copy > p:not(.eyebrow) { font-size: 11px; line-height: 1.62; }
   .catalog-toolbar { display: block; padding-top: 6px; }
   .tabs { min-height: 44px; margin-bottom: 10px; }

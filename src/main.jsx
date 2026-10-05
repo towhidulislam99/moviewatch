@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 
@@ -19,6 +19,12 @@ const ctaUrls = [
   'https://eatingjudgelos.com/izgpxyjj?key=3f0d3461e12c63b9522bf5c9f235e514',
   'https://eatingjudgelos.com/yk40evw0td?key=43a52e04f8163d827937e8d5a0cffaed',
 ];
+const adScriptConfigs = {
+  desktop: { key: '91955bf1b11f811d00e6a2d4cc9d93f3', width: 728, height: 90 },
+  mobile: { key: '966741978a7f6d7d0ef88ed1484108da', width: 320, height: 50 },
+  inFeed: { key: 'bac47e72c62ba5cb09bd0cc7395176ee', width: 300, height: 250 },
+};
+let adScriptQueue = Promise.resolve();
 
 const movieTitles = [
   'Hanuman Ansh', 'Sapio Sexual', 'Now Later', 'Vishwanath', 'Bugso', 'Women in the Dark',
@@ -94,6 +100,70 @@ function FilterSelect({ label, options, value, onChange }) {
       </select>
       <ChevronDown />
     </label>
+  );
+}
+
+function AdsterraBanner({ placement }) {
+  const slotRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 760px)').matches);
+  const config = placement === 'inFeed'
+    ? adScriptConfigs.inFeed
+    : isMobile ? adScriptConfigs.mobile : adScriptConfigs.desktop;
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 760px)');
+    const updateViewport = (event) => setIsMobile(event.matches);
+    mediaQuery.addEventListener('change', updateViewport);
+    return () => mediaQuery.removeEventListener('change', updateViewport);
+  }, []);
+
+  useEffect(() => {
+    const slot = slotRef.current;
+    if (!slot) return undefined;
+
+    let cancelled = false;
+    adScriptQueue = adScriptQueue.then(() => new Promise((resolve) => {
+      if (cancelled || !slot.isConnected) {
+        resolve();
+        return;
+      }
+
+      window.atOptions = {
+        key: config.key,
+        format: 'iframe',
+        height: config.height,
+        width: config.width,
+        params: {},
+      };
+
+      const script = document.createElement('script');
+      script.src = `https://eatingjudgelos.com/${config.key}/invoke.js`;
+      script.async = false;
+      script.onload = resolve;
+      script.onerror = () => {
+        console.error(`Adsterra banner failed to load (${config.width}x${config.height}).`);
+        resolve();
+      };
+      slot.appendChild(script);
+    })).catch((error) => {
+      console.error('Adsterra banner could not be initialized.', error);
+    });
+
+    return () => {
+      cancelled = true;
+      slot.replaceChildren();
+    };
+  }, [config]);
+
+  return (
+    <aside className={`ad-slot ${placement === 'inFeed' ? 'ad-slot--in-feed' : 'ad-slot--top'}`} aria-label="Advertisement">
+      <span className="ad-slot-label">Advertisement</span>
+      <div
+        className="ad-slot-frame"
+        ref={slotRef}
+        style={{ width: config.width, height: config.height }}
+      />
+    </aside>
   );
 }
 
@@ -191,6 +261,8 @@ function App() {
           <ProviderRail />
         </section>
 
+        <AdsterraBanner placement="top" />
+
         <section className="catalog-section" aria-label="Movie catalog">
           <div className="catalog-toolbar">
             <div className="tabs" role="tablist" aria-label="Content type">
@@ -213,7 +285,16 @@ function App() {
           </div>
 
           {filteredMovies.length > 0 ? <div className="movie-grid">
-            {filteredMovies.slice(0, visibleCount).map((movie) => <MovieCard key={`${movie.slug}-${movie.type}`} movie={movie} isSaved={saved.includes(movie.slug)} onToggleSaved={toggleSaved} />)}
+            {filteredMovies.slice(0, visibleCount).map((movie, index) => (
+              <React.Fragment key={`${movie.slug}-${movie.type}`}>
+                <MovieCard movie={movie} isSaved={saved.includes(movie.slug)} onToggleSaved={toggleSaved} />
+                {index === 11 && filteredMovies.length > 12 && (
+                  <div className="ad-grid-item">
+                    <AdsterraBanner placement="inFeed" />
+                  </div>
+                )}
+              </React.Fragment>
+            ))}
           </div> : <div className="empty-state"><span className="empty-icon">⌕</span><h2>No titles found</h2><p>Try removing a filter or searching for another movie.</p><button onClick={resetAll}>Reset all filters</button></div>}
 
           {filteredMovies.length > visibleCount && <button className="load-more" onClick={() => setVisibleCount((count) => count + 12)}>See More <span>↓</span></button>}
