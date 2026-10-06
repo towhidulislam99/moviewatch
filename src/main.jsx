@@ -167,6 +167,37 @@ function AdsterraBanner({ placement }) {
   );
 }
 
+function ExitAdPopup({ isOpen, onClose }) {
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (isOpen && !dialog.open) dialog.showModal();
+    if (!isOpen && dialog.open) dialog.close();
+  }, [isOpen]);
+
+  return (
+    <dialog
+      className="exit-ad-dialog"
+      ref={dialogRef}
+      aria-labelledby="exit-ad-title"
+      onClose={onClose}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) event.currentTarget.close();
+      }}
+    >
+      <button className="exit-ad-close" type="button" aria-label="Close advertisement" onClick={() => dialogRef.current?.close()}>
+        ×
+      </button>
+      <h2 id="exit-ad-title">Before you go</h2>
+      <p className="exit-ad-copy">Sponsored message</p>
+      <AdsterraBanner placement="inFeed" />
+    </dialog>
+  );
+}
+
 function MovieCard({ movie, isSaved, onToggleSaved }) {
   return (
     <article className="movie-card">
@@ -191,6 +222,23 @@ function App() {
   const [sort, setSort] = useState('Popularity');
   const [visibleCount, setVisibleCount] = useState(24);
   const [saved, setSaved] = useState([]);
+  const [isExitAdOpen, setIsExitAdOpen] = useState(false);
+  const exitAdTriggered = useRef(false);
+
+  useEffect(() => {
+    const canDetectExitIntent = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (!canDetectExitIntent) return undefined;
+
+    const handleMouseOut = (event) => {
+      if (event.relatedTarget !== null || event.clientY > 0 || exitAdTriggered.current) return;
+
+      exitAdTriggered.current = true;
+      setIsExitAdOpen(true);
+    };
+
+    document.addEventListener('mouseout', handleMouseOut);
+    return () => document.removeEventListener('mouseout', handleMouseOut);
+  }, []);
 
   const filteredMovies = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -303,6 +351,7 @@ function App() {
       </main>
 
       <button className="floating-help" aria-label="Open MovieWatch help"><span></span><span></span><span></span></button>
+      <ExitAdPopup isOpen={isExitAdOpen} onClose={() => setIsExitAdOpen(false)} />
     </div>
   );
 }
